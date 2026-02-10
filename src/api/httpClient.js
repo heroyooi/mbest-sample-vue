@@ -2,6 +2,25 @@ const defaultHeaders = {
   Accept: "application/json"
 };
 
+const rawBaseUrl = import.meta.env.VITE_API_BASE_URL || "";
+const baseUrl = rawBaseUrl.replace(/\/+$/, "");
+
+const buildUrl = (url) => {
+  if (/^https?:\/\//i.test(url)) {
+    return url;
+  }
+
+  if (!baseUrl) {
+    return url;
+  }
+
+  if (url.startsWith("/")) {
+    return `${baseUrl}${url}`;
+  }
+
+  return `${baseUrl}/${url}`;
+};
+
 const parseJsonSafely = async (response) => {
   try {
     return await response.json();
@@ -11,7 +30,7 @@ const parseJsonSafely = async (response) => {
 };
 
 export const request = async (url, options = {}) => {
-  const response = await fetch(url, {
+  const response = await fetch(buildUrl(url), {
     ...options,
     headers: {
       ...defaultHeaders,
